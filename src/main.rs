@@ -1,4 +1,4 @@
-use nom::{bytes::complete::take_while_m_n, combinator::map_res, sequence::tuple, IResult};
+use nom::{bytes::complete::take_while_m_n, sequence::tuple, IResult, Parser};
 use nom_supreme::{error::ErrorTree, tag::complete::tag, ParserExt};
 
 #[derive(Debug, PartialEq)]
@@ -17,17 +17,17 @@ fn is_hex_digit(c: char) -> bool {
 }
 
 fn hex_primary(input: &str) -> IResult<&str, u8, ErrorTree<&str>> {
-    map_res(
-        take_while_m_n(2, 2, is_hex_digit).context("Should be a 2 digit hex code"),
-        from_hex,
-    )(input)
+    take_while_m_n(2, 2, is_hex_digit)
+        .context("Should be a 2 digit hex code")
+        .map_res(from_hex)
+        .parse(input)
 }
 
 fn hex_color(input: &str) -> IResult<&str, Color, ErrorTree<&str>> {
-    let (input, _) = tag("#")(input)?;
-    let (input, (red, green, blue)) = tuple((hex_primary, hex_primary, hex_primary))(input)?;
-
-    Ok((input, Color { red, green, blue }))
+    tuple((hex_primary, hex_primary, hex_primary))
+        .preceded_by(tag("#"))
+        .parse(input)
+        .map(|(input, (red, green, blue))| (input, Color { red, green, blue }))
 }
 
 fn main() {
