@@ -1,6 +1,7 @@
 use nom::{bytes::complete::take_while_m_n, combinator::map_res, sequence::tuple, IResult};
 use nom_supreme::error::ErrorTree;
 use nom_supreme::tag::complete::tag;
+use nom_supreme::ParserExt;
 
 #[derive(Debug, PartialEq)]
 pub struct Color {
@@ -18,7 +19,10 @@ fn is_hex_digit(c: char) -> bool {
 }
 
 fn hex_primary(input: &str) -> IResult<&str, u8, ErrorTree<&str>> {
-    map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input)
+    map_res(
+        take_while_m_n(2, 2, is_hex_digit).context("Should be a 2 digit hex code"),
+        from_hex,
+    )(input)
 }
 
 fn hex_color(input: &str) -> IResult<&str, Color, ErrorTree<&str>> {
