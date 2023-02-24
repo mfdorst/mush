@@ -1,5 +1,10 @@
 use nom::{bytes::complete::take_while_m_n, sequence::tuple, IResult, Parser};
-use nom_supreme::{error::ErrorTree, tag::complete::tag, ParserExt};
+use nom_supreme::{
+    error::ErrorTree,
+    final_parser::{final_parser, Location, RecreateContext},
+    tag::complete::tag,
+    ParserExt,
+};
 
 #[derive(Debug, PartialEq)]
 pub struct Color {
@@ -30,21 +35,21 @@ fn hex_color(input: &str) -> IResult<&str, Color, ErrorTree<&str>> {
         .map(|(input, (red, green, blue))| (input, Color { red, green, blue }))
 }
 
+fn hex_color_final(input: &str) -> Result<Color, ErrorTree<&str>> {
+    final_parser(hex_color)(input)
+}
+
 fn main() {
-    assert_eq!(
-        hex_color("#2F14DF").unwrap(),
-        (
-            "",
-            Color {
-                red: 47,
-                green: 20,
-                blue: 223,
-            }
-        )
-    );
-
-    let _ = dbg!(hex_color("#2"));
-    let _ = dbg!(hex_color("234567"));
-
-    hex_color("#12").unwrap();
+    let res = hex_color_final("#5");
+    if let Err(ErrorTree::Stack {
+        base: error,
+        contexts,
+    }) = res
+    {
+        dbg!(&error);
+        for (location, _stack_context) in contexts {
+            let Location { line, column } = Location::recreate_context("#5", location);
+            dbg!(line, column);
+        }
+    }
 }
