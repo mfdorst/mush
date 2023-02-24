@@ -1,10 +1,6 @@
-use nom::{
-    bytes::complete::{tag, take_while_m_n},
-    combinator::map_res,
-    sequence::tuple,
-    IResult,
-};
+use nom::{bytes::complete::take_while_m_n, combinator::map_res, sequence::tuple, IResult};
 use nom_supreme::error::ErrorTree;
+use nom_supreme::tag::complete::tag;
 
 #[derive(Debug, PartialEq)]
 pub struct Color {
