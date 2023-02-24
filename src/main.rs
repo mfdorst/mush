@@ -4,6 +4,7 @@ use nom::{
     sequence::tuple,
     IResult,
 };
+use nom_supreme::error::ErrorTree;
 
 #[derive(Debug, PartialEq)]
 pub struct Color {
@@ -20,11 +21,11 @@ fn is_hex_digit(c: char) -> bool {
     c.is_digit(16)
 }
 
-fn hex_primary(input: &str) -> IResult<&str, u8> {
+fn hex_primary(input: &str) -> IResult<&str, u8, ErrorTree<&str>> {
     map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input)
 }
 
-fn hex_color(input: &str) -> IResult<&str, Color> {
+fn hex_color(input: &str) -> IResult<&str, Color, ErrorTree<&str>> {
     let (input, _) = tag("#")(input)?;
     let (input, (red, green, blue)) = tuple((hex_primary, hex_primary, hex_primary))(input)?;
 
@@ -33,14 +34,19 @@ fn hex_color(input: &str) -> IResult<&str, Color> {
 
 fn main() {
     assert_eq!(
-        hex_color("#2F14DF"),
-        Ok((
+        hex_color("#2F14DF").unwrap(),
+        (
             "",
             Color {
                 red: 47,
                 green: 20,
                 blue: 223,
             }
-        ))
+        )
     );
+
+    let _ = dbg!(hex_color("#2"));
+    let _ = dbg!(hex_color("234567"));
+
+    hex_color("#12").unwrap();
 }
