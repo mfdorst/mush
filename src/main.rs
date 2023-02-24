@@ -1,7 +1,5 @@
 use nom::{bytes::complete::take_while_m_n, combinator::map_res, sequence::tuple, IResult};
-use nom_supreme::error::ErrorTree;
-use nom_supreme::tag::complete::tag;
-use nom_supreme::ParserExt;
+use nom_supreme::{error::ErrorTree, tag::complete::tag, ParserExt};
 
 #[derive(Debug, PartialEq)]
 pub struct Color {
